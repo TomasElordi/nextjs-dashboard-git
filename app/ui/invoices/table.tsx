@@ -4,6 +4,15 @@ import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
 import { fetchFilteredInvoices } from '@/app/lib/data';
 
+type Invoice = {
+  id: string;
+  name: string;
+  email: string;
+  image_url: string;
+  amount: number;
+  date: string;
+  status: string;
+};
 export default async function InvoicesTable({
   query,
   currentPage,
@@ -11,7 +20,21 @@ export default async function InvoicesTable({
   query: string;
   currentPage: number;
 }) {
-  const invoices = await fetchFilteredInvoices(query, currentPage);
+  const responseInvoices = await fetch(
+    `${process.env.URL}/api/fetchFilteredInvoices`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        currentPage,
+      }),
+    },
+  );
+
+  const invoices: Invoice[] = (await responseInvoices.json()).data;
 
   return (
     <div className="mt-6 flow-root">
@@ -90,6 +113,7 @@ export default async function InvoicesTable({
                         className="rounded-full"
                         width={28}
                         height={28}
+                        alt={`${invoice.name}'s profile picture`}
                       />
                       <p>{invoice.name}</p>
                     </div>
